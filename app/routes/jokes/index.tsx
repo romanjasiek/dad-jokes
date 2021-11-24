@@ -9,30 +9,12 @@ type LoaderData = { randomJoke: Joke };
 export let loader: LoaderFunction = async ({ request }) => {
   let userId = await getUserId(request);
 
-  // this isn't how you should do it, but the proper way was not working
-  // in production... I think it's fly's fault actually...
   let jokes = userId
     ? await db.joke.findMany({
         where: { jokesterId: userId },
       })
     : [];
   let randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-
-  // Here's the proper way:
-  /*
-  const count = userId
-    ? await db.joke.count({ where: { jokesterId: userId } })
-    : 0;
-  let randomRowNumber = Math.floor(Math.random() * count);
-  let [randomJoke] =
-    count > 0 && userId
-      ? await db.joke.findMany({
-          take: 1,
-          skip: randomRowNumber,
-          where: { jokesterId: userId },
-        })
-      : [];
-  */
 
   if (!randomJoke) {
     throw new Response("No random joke found", { status: 404 });
